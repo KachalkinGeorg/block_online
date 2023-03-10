@@ -1,0 +1,20 @@
+;
+; Version description file for plugin @@ Next Generation CMS
+;
+
+ID: block_online
+Name: Блок онлайн
+Version: 0.1
+Acts: index 
+File: block_online.php
+Install: install.php
+Deinstall: uninstall.php
+Config: config.php
+Type: widget
+Description: Отображает посетителей на сайте.
+Author: KachalkinGeorg
+Author_URI: 
+Icon: <i class='fa fa-user-secret fa-2x'></i>
+Title: Блок онлайн
+Information: Плагин добавляет на сайт блок с количеством посетителей, которые зашли на сайте.
+Preinstall: default_no
