@@ -28,6 +28,7 @@ var hidecomm = [], rateval = 0, oright = 0, otop = 0;
 
 <text style="color: rgba(133, 153, 0, 1);">Сейчас на сайте:</text> {sum_count}<br />
 <text style="color: rgba(133, 153, 0, 1);">Гостей:</text> {guest_count}<br />
+<text style="color: rgba(133, 153, 0, 1);">Роботов:</text> {bot_count}<br />
 <text style="color: rgba(133, 153, 0, 1);">Пользователей:</text> {user_count}<br />
 
 <center><font style="color: rgba(14, 144, 210, 1);"> ‹---☢---› </font></center>
@@ -50,5 +51,5 @@ var hidecomm = [], rateval = 0, oright = 0, otop = 0;
 {online_user_vizit}
 <div style="clear:both"></div>
 <br />
-			
+<br />		
 </div>			

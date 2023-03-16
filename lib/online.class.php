@@ -113,18 +113,22 @@ function user_position()
 		$titl_c = $SYSTEM_FLAGS['news']['currentCategory.name'];
 		
 		$actors = $_REQUEST['actor'];
+		$search = $_REQUEST['search'];
+		$genres = $_REQUEST['genre'];
+		$collections = $_REQUEST['collection'];
 
 		switch($CurrentHandler['pluginName'])
 		{
 			case "main":			$result = "Просматривает главную страницу"; break;
 			case "news":			if($CurrentHandler['handlerName'] == 'news') $result = "Просматривает новость: $titl_n"; if($CurrentHandler['handlerName'] == 'by.category') $result = "Просматривает категорию: $titl_c"; if($SYSTEM_FLAGS['info']['title']['group'] == $lang['404.title']) $result = "Просматривает страницу: Error 404"; break;
 			case "static":			$result = "Просматривает страницу: $titl_s"; break;	
+			case "search":			$result = "Ищет тему: $search"; break;
 			case "pm":				$result = "Находится в разделе: Личные сообщения"; break;
 			case "bookmarks":		$result = "Просматривает избранные статьи"; break;
 			case "uprofile":		$result = "Просматривает профиль"; break;
 			
-			case "genres":			$result = "Просматривает жанры"; break;
-			case "collections":		$result = "Просматривает коллекции новостей"; break;	
+			case "genres":			$result = "Просматривает жанр: $genres"; break;
+			case "collections":		$result = "Просматривает коллекцию: $collections"; break;	
 			case "avatar":			$result = "Выбирает аватар"; break;
 			case "tags":			$result = "Просматривает облако тегов"; break;
 

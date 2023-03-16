@@ -20,7 +20,7 @@ function about()
 	$tVars = array();
 	$xg = $twig->loadTemplate($tpath['main'].'main.tpl');
 	
-	$about = 'версия 0.1';
+	$about = 'версия 0.2';
 	
 	$tVars = array(
 		'global' => 'О плагине',

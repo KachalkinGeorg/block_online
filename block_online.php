@@ -199,7 +199,8 @@ function block_online ()
 		'online_user_vizit' => $online_user_vizit,
 		'user_count' 		=> $u,
 		'guest_count'		=> $g,
-		'sum_count'			=> $u + $g,
+		'bot_count'			=> $b,
+		'sum_count'			=> $u + $g + $b,
 		'online_user' 		=> $online_user,
 		'online_bot' 		=> $online_bot ? $online_bot : 'нет',
 	);
