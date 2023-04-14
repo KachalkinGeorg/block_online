@@ -31,7 +31,7 @@ function isBot()
 
 function block_online ()
 {
-	global $mysql, $tpl, $config, $template, $userROW, $ip, $lang;
+	global $mysql, $tpl, $config, $template, $userROW, $ip, $lang, $UGROUP;
 	
 	$tpath = locatePluginTemplates(array('skins/user_hint', 'skins/user_block'), 'block_online', intval(pluginGetVariable('block_online', 'localsource')));	
 
@@ -40,14 +40,16 @@ function block_online ()
 	
 	LoadPluginLang('block_online', 'main', '', '', ':');
 	
-	$agent 	= !$userROW['id']    ? isBot()    : $_SERVER['HTTP_USER_AGENT'];
 	$login 	= $userROW['name']   ? $userROW['name']   : '';
 	$grp 	= $userROW['status'] ? $userROW['status'] : ($GLOBALS['BOOT'] ? -1 : 0);
 	$id 	= $userROW['id']     ? $userROW['id']     : 0;
+	$agent 	= $id    ? isBot()    : $_SERVER['HTTP_USER_AGENT'];
 	$os 	= user_OS($_SERVER["HTTP_USER_AGENT"])   ? user_OS($_SERVER["HTTP_USER_AGENT"])   : 'неизвестно';
 	$browser 	= user_browser($_SERVER["HTTP_USER_AGENT"])   ? user_browser($_SERVER["HTTP_USER_AGENT"])   : 'неизвестно';
 	$location 	= user_position()   ? user_position()   : '';
-	$sess = md5($agent.$ip.$id);
+	
+	//$sess = md5($agent.$ip.$id);
+	$sess = session_id();
 	
 	# check session
 	$ss = $mysql->record('SELECT `session` FROM '.prefix.'_online WHERE `session` = '.db_squote($sess).' LIMIT 1');
@@ -101,12 +103,7 @@ function block_online ()
 		{
 			if ($jouser[$row['id']]) continue;
 			
-			switch($row['status']){
-				case 1: $status = $lang['block_online:st_1']; break;
-				case 2: $status = $lang['block_online:st_2']; break;
-				case 3: $status = $lang['block_online:st_3']; break;
-				case 4: $status = $lang['block_online:st_4']; break;
-			}
+			$status = isset($UGROUP[$row['status']]) ? $UGROUP[$row['status']]['name'] : ('Unknown ['.$row['status'].']');
 			
 			$u++;
 			
@@ -116,7 +113,7 @@ function block_online ()
 			$avatar_link = $row['avatar'] ? avatars_url.'/'.$row['avatar'] : avatars_url.'/noavatar.gif';
 			
 			if (is_array($userROW) && ($userROW['status'] == 1 || $userROW['status'] == 2)) { 
-				$userip = $ip ? $ip : $_SERVER["REMOTE_ADDR"];
+				$userip = $ip ? $ip : '0.0.0.0';
 				$user_ip = '<b>IP:</b>&nbsp;'.$userip.'<br />';
 			}
 			
@@ -151,7 +148,17 @@ function block_online ()
 
 			$jouser[$row['id']] = true;
 
-		} else $g++;
+		} elseif ($row['status'] == 0){
+				$t.= '<div class="online_out'.$num_user_last.'">гость'.$separat.'</div>';
+				$g++;
+				
+				$guests = '<img src=\''.admin_url.'/plugins/block_online/img/nouser.png\'><div class=\'statonline\'>'.$ip.'</div>';
+				$guest1 = '<b>Браузер:</b> '.$row['browser'].'<br />';
+				$guest2 = '<b>Локация:</b> '.$row['location'].'<br />';
+				$hint = pluginGetVariable('block_online', 'hint') ? pluginGetVariable('block_online', 'hint') : 'hintbox';
+
+				$guest.= '<a href="" udata="<div class=\''.$hint.'\'><div class=\'lcol\'>'.$guests.'</div><div class=\'rcol\'>'.$guest1.''.$guest2.'</div></div>">гость</a>'.$separator.'';
+			}
 
 	}
 	
@@ -170,12 +177,8 @@ function block_online ()
 		}
 		elseif ($row['status'] > 0)
 		{
-			switch($row['status']){
-				case 1: $status = $lang['block_online:st_1']; break;
-				case 2: $status = $lang['block_online:st_2']; break;
-				case 3: $status = $lang['block_online:st_3']; break;
-				case 4: $status = $lang['block_online:st_4']; break;
-			}
+			
+			$status = isset($UGROUP[$row['status']]) ? $UGROUP[$row['status']]['name'] : ('Unknown ['.$row['status'].']');
 
 			$vizit = str_replace(array('{profile_link}', '{login}', '{status}', '{num_user_vizit}', '{location}', '{reg}', '{separator}'), array($profile_link, $row['login'], $status, $num_user_vizit, $row['location'], langdate("j Q Y", $row['reg']), $vseparat), $lang['block_online:vizit']);
 			
@@ -189,9 +192,10 @@ function block_online ()
 	$online_user = substr($ouser, 0, strlen($ouser));
 	$obot = $bot;
 	$online_bot = substr($obot, 0, strlen($obot));
+	$oguest = $guest;
+	$online_guest = substr($oguest, 0, strlen($oguest));
 
-
-	$vizit = $vizit.$vk;
+	$vizit = $vizit.$vk.$t;
 	$online_user_vizit = substr($vizit, 0, strlen($vizit)-2);
 	
 	$tvars['vars'] = array (
@@ -201,8 +205,10 @@ function block_online ()
 		'guest_count'		=> $g,
 		'bot_count'			=> $b,
 		'sum_count'			=> $u + $g + $b,
-		'online_user' 		=> $online_user,
+		'online_user' 		=> $online_user ? $online_user : 'нет',
 		'online_bot' 		=> $online_bot ? $online_bot : 'нет',
+		'online_guest' 		=> $online_guest ? $online_guest : 'нет',
+		'online_time'		=> gmdate('H:i', $vtimeout),
 	);
 
 	$tpl->template('skins/user_block', $tpath['skins/user_block']);

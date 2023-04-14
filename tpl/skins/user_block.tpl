@@ -34,6 +34,7 @@ var hidecomm = [], rateval = 0, oright = 0, otop = 0;
 <center><font style="color: rgba(14, 144, 210, 1);"> ‹---☢---› </font></center>
 
 <text style="color: rgba(133, 153, 0, 1);">Пользователи:</text> {online_user}<br />
+<text style="color: rgba(133, 153, 0, 1);">Гости:</text> {online_guest}<br />
 <text style="color: rgba(133, 153, 0, 1);">Роботы:</text> {online_bot}<br />
 
 <center><font style="color: rgba(14, 144, 210, 1);"> ‹---☢---› </font></center>
@@ -46,7 +47,7 @@ var hidecomm = [], rateval = 0, oright = 0, otop = 0;
 <br />
 <div style="clear:both"></div>
 <br />
-<div style="text-transform:uppercase;text-align: center;position:relative;">&nbsp;Сегодня нас посетили&nbsp;</div>
+<div style="text-transform:uppercase;text-align: center;position:relative;">&nbsp;Сегодня нас посетили за {online_time}&nbsp;</div>
 <br />
 {online_user_vizit}
 <div style="clear:both"></div>
