@@ -105,17 +105,21 @@ function user_browser($useragent)
 	
 function user_position()
 	{
-		global $catz, $catmap, $CurrentHandler, $plugin, $SYSTEM_FLAGS, $lang;
+		global $catz, $catmap, $userROW, $CurrentHandler, $plugin, $SYSTEM_FLAGS, $lang;
 		$result = "Просматривает главную страницу";
 		
 		$titl_n = $SYSTEM_FLAGS['news']['db.title'];
 		$titl_s = $SYSTEM_FLAGS['static']['db.title'];
 		$titl_c = $SYSTEM_FLAGS['news']['currentCategory.name'];
 		
-		$actors = $_REQUEST['actor'];
+		$actors = $SYSTEM_FLAGS['info']['title']['group'];
 		$search = $_REQUEST['search'];
-		$genres = $_REQUEST['genre'];
-		$collections = $_REQUEST['collection'];
+		$genres = $SYSTEM_FLAGS['info']['title']['group'];
+		$gaid = $SYSTEM_FLAGS['info']['title']['others'];
+		$collections = $SYSTEM_FLAGS['info']['title']['group'];
+		$collections = $SYSTEM_FLAGS['info']['title']['group'];
+		$tags = $SYSTEM_FLAGS['info']['title']['group'];
+		$author = $SYSTEM_FLAGS['info']['title']['item'];
 
 		switch($CurrentHandler['pluginName'])
 		{
@@ -125,12 +129,13 @@ function user_position()
 			case "search":			$result = "Ищет тему: $search"; break;
 			case "pm":				$result = "Находится в разделе: Личные сообщения"; break;
 			case "bookmarks":		$result = "Просматривает избранные статьи"; break;
-			case "uprofile":		$result = "Просматривает профиль"; break;
+			case "uprofile":		$result = "Просматривает профиль $author"; break;
 			
 			case "genres":			$result = "Просматривает жанр: $genres"; break;
 			case "collections":		$result = "Просматривает коллекцию: $collections"; break;	
 			case "avatar":			$result = "Выбирает аватар"; break;
-			case "tags":			$result = "Просматривает облако тегов"; break;
+			case "gaid":			$result = "Просматривает ГИД: $gaid"; break;
+			case "tags":			$result = "Просматривает: $tags"; break;
 
 			case "feedback":		$result = "Находится в разделе"; break;
 			case "forum":			$result = "Просматривает форум"; break;
