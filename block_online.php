@@ -40,16 +40,14 @@ function block_online ()
 	
 	LoadPluginLang('block_online', 'main', '', '', ':');
 	
+	$agent 	= !$userROW['id']    ? isBot()    : $_SERVER['HTTP_USER_AGENT'];
 	$login 	= $userROW['name']   ? $userROW['name']   : '';
 	$grp 	= $userROW['status'] ? $userROW['status'] : ($GLOBALS['BOOT'] ? -1 : 0);
 	$id 	= $userROW['id']     ? $userROW['id']     : 0;
-	$agent 	= $id    ? isBot()    : $_SERVER['HTTP_USER_AGENT'];
 	$os 	= user_OS($_SERVER["HTTP_USER_AGENT"])   ? user_OS($_SERVER["HTTP_USER_AGENT"])   : 'неизвестно';
 	$browser 	= user_browser($_SERVER["HTTP_USER_AGENT"])   ? user_browser($_SERVER["HTTP_USER_AGENT"])   : 'неизвестно';
 	$location 	= user_position()   ? user_position()   : '';
-	
-	//$sess = md5($agent.$ip.$id);
-	$sess = session_id();
+	$sess = md5($agent.$ip.$id);
 	
 	# check session
 	$ss = $mysql->record('SELECT `session` FROM '.prefix.'_online WHERE `session` = '.db_squote($sess).' LIMIT 1');
@@ -63,7 +61,7 @@ function block_online ()
 		$mysql->query('UPDATE `'.prefix.'_online` SET `lasttime`='.time().', `id`='.$id.', `os`='.db_squote($os).', `browser`='.db_squote($browser).', `login`='.db_squote($login).', `status`='.$grp.', `location`='.db_squote($location).' WHERE `session`='.db_squote($ss['session']));
 	}
 	
-	$i = 0; $u = 0; $b = 0; $g = 0; $list = ''; $obot = '';
+	$i = 0; $u = 0; $b = 0; $g = 0; $list = ''; $obot = ''; $guest = '';
 	
 	$separator = pluginGetVariable('block_online', 'separator') ? pluginGetVariable('block_online', 'separator') : ', ';
 
@@ -99,12 +97,13 @@ function block_online ()
 
 			$bot.= '<a href="" udata="<div class=\''.$hint.'\'><div class=\'lcol\'>'.$robots.'</div><div class=\'rcol\'>'.$robot0.''.$robot1.''.$robot2.'</div></div>">'.$row['agent'].'</a>'.$separator.'';
 		}
+
 		elseif ($row['status'] > 0)
 		{
 			if ($jouser[$row['id']]) continue;
 			
 			$status = isset($UGROUP[$row['status']]) ? $UGROUP[$row['status']]['name'] : ('Unknown ['.$row['status'].']');
-			
+
 			$u++;
 			
 			$profile_link = checkLinkAvailable('uprofile', 'show')?
@@ -113,7 +112,7 @@ function block_online ()
 			$avatar_link = $row['avatar'] ? avatars_url.'/'.$row['avatar'] : avatars_url.'/noavatar.gif';
 			
 			if (is_array($userROW) && ($userROW['status'] == 1 || $userROW['status'] == 2)) { 
-				$userip = $ip ? $ip : '0.0.0.0';
+				$userip = $ip ? $ip : $_SERVER["REMOTE_ADDR"];
 				$user_ip = '<b>IP:</b>&nbsp;'.$userip.'<br />';
 			}
 			
@@ -148,18 +147,21 @@ function block_online ()
 
 			$jouser[$row['id']] = true;
 
-		} elseif ($row['status'] == 0){
-				$t.= '<div class="online_out'.$num_user_last.'">гость'.$separat.'</div>';
+		} else 
+				if ($row['status'] == 0)
+		{
+			$t.= '<div class="online_out'.$num_user_last.'">гость'.$separat.'</div>';
 				$g++;
-				
-				$guests = '<img src=\''.admin_url.'/plugins/block_online/img/nouser.png\'><div class=\'statonline\'>'.$ip.'</div>';
-				$guest1 = '<b>Браузер:</b> '.$row['browser'].'<br />';
-				$guest2 = '<b>Локация:</b> '.$row['location'].'<br />';
-				$hint = pluginGetVariable('block_online', 'hint') ? pluginGetVariable('block_online', 'hint') : 'hintbox';
-
-				$guest.= '<a href="" udata="<div class=\''.$hint.'\'><div class=\'lcol\'>'.$guests.'</div><div class=\'rcol\'>'.$guest1.''.$guest2.'</div></div>">гость</a>'.$separator.'';
+			if (is_array($userROW) && ($userROW['status'] == 1 || $userROW['status'] == 2)) { 
+				$guest_ip = '<div class=\'statonline\'>'.$row['ip'].'</div>';
 			}
 
+			$guests = '<img src=\''.admin_url.'/plugins/block_online/img/nouser.png\'>'.$guest_ip.'';
+			$guest1 = '<b>Браузер:</b> '.$row['browser'].'<br />';
+			$guest2 = '<b>Локация:</b> '.$row['location'].'<br />';
+			$hint = pluginGetVariable('block_online', 'hint') ? pluginGetVariable('block_online', 'hint') : 'hintbox';
+			$guest.= '<a href="" udata="<div class=\''.$hint.'\'><div class=\'lcol\'>'.$guests.'</div><div class=\'rcol\'>'.$guest1.''.$guest2.'</div></div>">гость</a>'.$separator.'';
+		}
 	}
 	
 	$lim = pluginGetVariable('block_online', 'limit');
@@ -195,7 +197,7 @@ function block_online ()
 	$oguest = $guest;
 	$online_guest = substr($oguest, 0, strlen($oguest));
 
-	$vizit = $vizit.$vk.$t;
+	$vizit = $vizit.$vk/* .$t */;
 	$online_user_vizit = substr($vizit, 0, strlen($vizit)-2);
 	
 	$tvars['vars'] = array (
