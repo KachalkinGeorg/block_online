@@ -10,5 +10,6 @@
 	{usergroup}
 	{last_visit}
 	{user_location}
+	{flag} {country} {city}
 	</div>
 </div>

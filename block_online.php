@@ -9,6 +9,7 @@ $BOOT = false;
 $jouser = Array();
 
 include_once(dirname(__FILE__) . '/lib/online.class.php');
+include_once(dirname(__FILE__) . '/lib/geoipcity.inc');
 
 function isBot()
 {
@@ -60,7 +61,7 @@ function block_online ()
 	}else{
 		$mysql->query('UPDATE `'.prefix.'_online` SET `lasttime`='.time().', `id`='.$id.', `os`='.db_squote($os).', `browser`='.db_squote($browser).', `login`='.db_squote($login).', `status`='.$grp.', `location`='.db_squote($location).' WHERE `session`='.db_squote($ss['session']));
 	}
-	
+
 	$i = 0; $u = 0; $b = 0; $g = 0; $list = ''; $obot = ''; $guest = '';
 	
 	$separator = pluginGetVariable('block_online', 'separator') ? pluginGetVariable('block_online', 'separator') : ', ';
@@ -82,20 +83,42 @@ function block_online ()
 	$res = $mysql->select('SELECT * FROM `'.prefix.'_online` WHERE `lasttime` > '.$tm.';');
 	foreach ($res as $row)
 	{
+		
+		$gi = geoip_open( extras_dir."/block_online/lib/GeoLiteCity.dat", GEOIP_STANDARD );
+		$geoip = geoip_record_by_addr( $gi, $row['ip'] );
+		geoip_close( $gi );
+
 		if ($row['status'] == -1)
 		{
 			$b++;
 			$k.= '<div class="online_out'.$num_user_last.'">'.$row['agent'].''.$separat.'</div>';
 			
-			if (pluginGetVariable('block_online', 'robo_ip')){
-				$robot0 = '<b>IP:</b> <span>'.$row['ip'].'</span><br />';
+			if (is_array($userROW) && ($userROW['status'] == 1 || $userROW['status'] == 2)) { 
+				if (pluginGetVariable('block_online', 'robo_ip')){
+					$robo_ip = '<b>IP:</b> <span>'.$row['ip'].'</span><br />';
+				}
+				
+				if (pluginGetVariable('block_online', 'robo_geo')){
+					$flag = "<img style=vertical-align:middle; src=".admin_url."/plugins/block_online/img/flags/".$geoip->country_code."0.gif>";
+					$robot4 = '<b>Страна:</b> '.$flag.' '.$geoip->country_name.' '.$geoip->country_code3.'<br />';
+				}
 			}
+			
+			$last_date = date('H:i:s', intval($row['lasttime']));
+			
+			if (pluginGetVariable('block_online', 'icon')){
+				$ico_loc = "<img style=vertical-align:middle; src=".admin_url."/plugins/block_online/img/read.gif>&nbsp;";
+				$ico_vis = "<img style=vertical-align:middle; src=".admin_url."/plugins/block_online/img/time.gif>&nbsp;";
+			}
+			
 			$robots = '<div><span style=\'padding:30px 30px 0 30px\'>'.robots($row['agent']).'</span></div>';
 			$robot1 = '<b>Браузер:</b> '.$row['browser'].'<br />';
-			$robot2 = '<b>Локация:</b> '.$row['location'].'<br />';
+			$robot2 = '<b>Локация:</b> '.$ico_loc.''.$row['location'].'<br />';
+			$robot3 = '<b>Последний визит:</b>&nbsp;'.$ico_vis.''.langdate("j Q Y", $last_time).'&nbsp;('.$last_date.')<br />';
+
 			$hint = pluginGetVariable('block_online', 'hint') ? pluginGetVariable('block_online', 'hint') : 'hintbox';
 
-			$bot.= '<a href="" udata="<div class=\''.$hint.'\'><div class=\'lcol\'>'.$robots.'</div><div class=\'rcol\'>'.$robot0.''.$robot1.''.$robot2.'</div></div>">'.$row['agent'].'</a>'.$separator.'';
+			$bot.= '<a href="" udata="<div class=\''.$hint.'\'><div class=\'lcol\'>'.$robots.'</div><div class=\'rcol\'>'.$robo_ip.''.$robot1.''.$robot2.''.$robot3.''.$robot4.'</div></div>">'.$row['agent'].'</a>'.$separator.'';
 		}
 
 		elseif ($row['status'] > 0)
@@ -112,27 +135,41 @@ function block_online ()
 			$avatar_link = $row['avatar'] ? avatars_url.'/'.$row['avatar'] : avatars_url.'/noavatar.gif';
 			
 			if (is_array($userROW) && ($userROW['status'] == 1 || $userROW['status'] == 2)) { 
-				$userip = $ip ? $ip : $_SERVER["REMOTE_ADDR"];
-				$user_ip = '<b>IP:</b>&nbsp;'.$userip.'<br />';
+				//$userip = $ip ? $ip : $_SERVER["REMOTE_ADDR"];
+				$user_ip = '<b>IP:</b>&nbsp;'.$row['ip'].'<br />';
+			}
+			
+			if (is_array($userROW) && ($userROW['status'] == 1 || $userROW['status'] == 2)) { 
+				$flag = "<img src=".admin_url."/plugins/block_online/img/flags/".$geoip->country_code."0.gif>";
+				$city = $geoip->city;
+				$country = $geoip->country_name;
 			}
 			
 			$time = time() + ($config['date_adjust'] * 60);
 			$last_time = $time - 500;
 			
 			$last_date = date('H:i:s', intval($row['lasttime']));
-		
+			
+			if (pluginGetVariable('block_online', 'icon')){
+				$ico_loc = "<img style=vertical-align:middle; src=".admin_url."/plugins/block_online/img/read.gif>&nbsp;";
+				$ico_vis = "<img style=vertical-align:middle; src=".admin_url."/plugins/block_online/img/time.gif>&nbsp;";
+			}
+			
 			$tvars['vars'] = array(
 				'hint'			=> pluginGetVariable('block_online', 'hint') ? pluginGetVariable('block_online', 'hint') : 'hintbox',
 				'foto'			=> $avatar_link,
 				'profile'		=> $profile_link,
+				'flag'			=> $flag,
+				'city'			=> $city,
+				'country'		=> $country,
 				'user'			=> $row['login'],
-				'user_location'	=> $row['location'],
+				'user_location'	=> '<b>Локация:</b>&nbsp;'.$ico_loc.''.$row['location'].'<br />',
 				'user_agent'	=> $row['os'],
 				'ip'			=> $user_ip,
 				'browser_icon'	=> '<b>Браузер:</b>&nbsp;'.$row['browser'].'<br />',
 				'user_OS'		=> '<b>ОС:</b>&nbsp;'.$row['os'].'<br />',
 				'usergroup'		=> '<b>Группа:</b>&nbsp;'.$status.'<br />',
-				'last_visit'	=> '<b>Последний визит:</b>&nbsp;'.langdate("j Q Y", $last_time).'&nbsp;('.$last_date.')<br />',
+				'last_visit'	=> '<b>Последний визит:</b>&nbsp;'.$ico_vis.''.langdate("j Q Y", $last_time).'&nbsp;('.$last_date.')<br />',
 			);
 		
 			$tpl->template('skins/user_hint', $tpath['skins/user_hint']);
@@ -152,15 +189,31 @@ function block_online ()
 		{
 			$t.= '<div class="online_out'.$num_user_last.'">гость'.$separat.'</div>';
 				$g++;
-			if (is_array($userROW) && ($userROW['status'] == 1 || $userROW['status'] == 2)) { 
-				$guest_ip = '<div class=\'statonline\'>'.$row['ip'].'</div>';
+			
+			if (is_array($userROW) && ($userROW['status'] == 1 || $userROW['status'] == 2)) {
+				if (pluginGetVariable('block_online', 'guest_ip')){
+					$guest_ip = '<div class=\'statonline\'>'.$row['ip'].'</div>';
+				}
+				if (pluginGetVariable('block_online', 'guest_geo')){
+					$flag = "<img src=".admin_url."/plugins/block_online/img/flags/".$geoip->country_code."0.gif>";
+					$guest4 = '<b>Страна:</b> '.$flag.' '.$geoip->country_name.' '.$geoip->country_code3.'<br />';
+				}
 			}
+			
+			$last_date = date('H:i:s', intval($row['lasttime']));
 
+			if (pluginGetVariable('block_online', 'icon')){
+				$ico_loc = "<img style=vertical-align:middle; src=".admin_url."/plugins/block_online/img/read.gif>&nbsp;";
+				$ico_vis = "<img style=vertical-align:middle; src=".admin_url."/plugins/block_online/img/time.gif>&nbsp;";
+			}
+			
 			$guests = '<img src=\''.admin_url.'/plugins/block_online/img/nouser.png\'>'.$guest_ip.'';
 			$guest1 = '<b>Браузер:</b> '.$row['browser'].'<br />';
-			$guest2 = '<b>Локация:</b> '.$row['location'].'<br />';
+			$guest2 = '<b>Локация:</b> '.$ico_loc.''.$row['location'].'<br />';
+			$guest3 = '<b>Последний визит:</b>&nbsp;'.$ico_vis.''.langdate("j Q Y", $last_time).'&nbsp;('.$last_date.')<br />';
+
 			$hint = pluginGetVariable('block_online', 'hint') ? pluginGetVariable('block_online', 'hint') : 'hintbox';
-			$guest.= '<a href="" udata="<div class=\''.$hint.'\'><div class=\'lcol\'>'.$guests.'</div><div class=\'rcol\'>'.$guest1.''.$guest2.'</div></div>">гость</a>'.$separator.'';
+			$guest.= '<a href="" udata="<div class=\''.$hint.'\'><div class=\'lcol\'>'.$guests.'</div><div class=\'rcol\'>'.$guest1.''.$guest2.''.$guest3.''.$guest4.'</div></div>">гость</a>'.$separator.'';
 		}
 	}
 	

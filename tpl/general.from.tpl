@@ -13,6 +13,15 @@
       </tr>
       <tr>
         <td class="col-xs-6 col-sm-6 col-md-7">
+		  <h6 class="media-heading text-semibold">Иконки:</h6>
+		  <span class="text-muted text-size-small hidden-xs">Отображать иконки в hint</span>
+		</td>
+        <td class="col-xs-6 col-sm-6 col-md-5">
+			<select name="icon">{{ icon }}</select>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-xs-6 col-sm-6 col-md-7">
 		  <h6 class="media-heading text-semibold">Разделитель в списке пользователей.</h6>
 		  <span class="text-muted text-size-small hidden-xs">По умолчанию запятая</span>
 		</td>
@@ -45,6 +54,33 @@
 		</td>
         <td class="col-xs-6 col-sm-6 col-md-5">
 			<select name="robo_ip">{{ robo_ip }}</select>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-xs-6 col-sm-6 col-md-7">
+		  <h6 class="media-heading text-semibold">Отображать ГЕО определения робота:</h6>
+		  <span class="text-muted text-size-small hidden-xs">Включить отображения geoip у поисковиков (флаг, город, страна)</span>
+		</td>
+        <td class="col-xs-6 col-sm-6 col-md-5">
+			<select name="robo_geo">{{ robo_geo }}</select>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-xs-6 col-sm-6 col-md-7">
+		  <h6 class="media-heading text-semibold">Отображать ИП адресс гостя:</h6>
+		  <span class="text-muted text-size-small hidden-xs">Включить отображения ИП адресса у поситителей</span>
+		</td>
+        <td class="col-xs-6 col-sm-6 col-md-5">
+			<select name="guest_ip">{{ guest_ip }}</select>
+        </td>
+      </tr>
+      <tr>
+        <td class="col-xs-6 col-sm-6 col-md-7">
+		  <h6 class="media-heading text-semibold">Отображать ГЕО определения гостя:</h6>
+		  <span class="text-muted text-size-small hidden-xs">Включить отображения geoip у поситителей (флаг, город, страна)</span>
+		</td>
+        <td class="col-xs-6 col-sm-6 col-md-5">
+			<select name="guest_geo">{{ guest_geo }}</select>
         </td>
       </tr>
       <tr>
